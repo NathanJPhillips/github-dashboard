@@ -1,0 +1,20 @@
+<html>
+	<head>
+		<title>Open PR count on GitHub</title>
+	</head>
+	<body>
+		<div>
+			<p id="content">Loading...</p>
+		</div>
+		<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+		<script>
+			function update() {
+				$.getJSON("http://api.github.com/search/issues?q=user%3Adiffblue+type%3Apr+is%3Aopen", function(data, textStatus, jqXHR) {
+					$("#content").text(data.total_count).css("fontSize", "600px");
+				});
+			}
+			$(update);
+			setInterval(update, 60000);
+		</script>
+	</body>
+</html>
