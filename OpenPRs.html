@@ -19,17 +19,11 @@
     <script src="SearchResults.js"></script>
     <script>
       var viewModel = new SearchResults();
-
       $(function () {
-        $.ajaxSetup({
-          beforeSend: function (xhr) {
-            xhr.setRequestHeader("Authorization", "Basic " + btoa(username + ":" + accessCode));
-          }
-        });
         viewModel.update();
         ko.applyBindings(viewModel);
+        setInterval(viewModel.update, 5 * 60 * 1000);
       });
-      setInterval(viewModel.update, 5 * 60 * 1000);
     </script>
   </body>
 </html>
