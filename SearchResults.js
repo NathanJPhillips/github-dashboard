@@ -1,15 +1,18 @@
+function msToDaysTo1dp(ms) { return Math.round(ms / 1000 / 60 / 60 / 24 * 10) / 10; }
+function sum(collection) { return collection.reduce(function (sum, x) { return sum + x }, 0); }
+function min(collection) { return collection.reduce(function (min, x) { return x > min ? min : x; }, NaN); }
+function max(collection) { return collection.reduce(function (max, x) { return x < max ? max : x; }, NaN); }
+function average(collection) { return sum(collection) / collection.length; }
+
 function SearchResults() {
   var self = this;
 
   self.items = ko.observableArray([]);
   self.totalCount = ko.observable(0);
-  self.averageAge = ko.computed(function () {
-    if (self.items().length != 0) {
-      var itemAges = self.items().map(function (item) { return new Date() - new Date(item.created_at); });
-      var averageAgeMs = itemAges.reduce(function (sum, age) { return sum + age }) / itemAges.length;
-      return Math.round(averageAgeMs / 1000 / 60 / 60 / 24 * 10) / 10;
-    }
-  });
+  self.itemAges = function () { return self.items().map(function (item) { return new Date() - new Date(item.created_at); }); };
+  self.averageAge = ko.computed(function () { return msToDaysTo1dp(average(self.itemAges())); });
+  self.minAge = ko.computed(function () { return msToDaysTo1dp(min(self.itemAges())); })
+  self.maxAge = ko.computed(function () { return msToDaysTo1dp(max(self.itemAges())); })
 
   self.errorMessage = ko.observable();
   self.activeRequests = ko.observable(0);

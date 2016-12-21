@@ -7,10 +7,10 @@
     <div style="text-align: center; font-size: 200px" data-bind="visible: uninitialised">
       <p>Loading...</p>
     </div>
-    <div style="text-align: center; font-size: 250px" data-bind="visible: !uninitialised()">
+    <div style="text-align: center; font-size: 200px" data-bind="visible: !uninitialised()">
       <p style="margin: 0">
         <span data-bind="text: totalCount" style="font-size: 500px"></span> PRs<br />
-        Age: <span data-bind="text: averageAge"></span> days
+        <span data-bind="text: minAge" style="font-size: 75px; vertical-align: text-top"></span><span data-bind="text: averageAge"></span><span data-bind="text: maxAge" style="font-size: 75px"></span> days old
       </p>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.1/knockout-min.js" integrity="sha256-PX9zWVaICUCeklczWaS9DLBb9uGN7pCkCT0Kyz1elRo=" crossorigin="anonymous"></script>
