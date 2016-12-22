@@ -28,7 +28,7 @@ function SearchResults() {
         $.getJSON(uri, function (data, textStatus, jqXHR) {
           self.totalCount(data.total_count);
           // Get the items
-          self.items(self.items().concat(data.items));
+          items = items.concat(data.items);
           // Get the link to the next page of results
           var nextLinkSuffix = "; rel=\"next\"";
           var nextLinks = jqXHR.getResponseHeader("Link").split(",").filter(function (link) { return link.endsWith(nextLinkSuffix); });
@@ -36,10 +36,11 @@ function SearchResults() {
             var nextLink = nextLinks[0];
             nextLink = nextLink.substring(1, nextLink.length - nextLinkSuffix.length - 1);
             getPage(nextLink);
-          } else {
-            if (self.items().length != self.totalCount())
-              self.errorMessage("Couldn't get all the PRs");
+            return;
           }
+          if (items.length != self.totalCount())
+            self.errorMessage("Couldn't get all the PRs");
+          self.items(items);
         }).always(function () { self.activeRequests(self.activeRequests() - 1); });
       }
       // Load the first page
