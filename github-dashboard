@@ -3,6 +3,6 @@ cd "$( dirname "${BASH_SOURCE[0]}" )"
 while true
 do
 	git pull
-	chromium-browser --user-data-dir="/tmp/chromium-user-data-`date +%s`" --disable-web-security --app=file://`pwd`/OpenPRs.html
+	chromium-browser --user-data-dir="/tmp/chromium-user-data-`date +%s`" --disable-web-security --app=file://`pwd`/OpenPRs.html --start-fullscreen
 	rm -rf /tmp/chromium-user-data-*
 done
