@@ -1,0 +1,24 @@
+body {
+	background-color: #1C75BC;
+}
+
+p {
+	color: white;
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	font-size: 200px;
+	text-align: center;
+	margin: 0;
+}
+
+#minAge {
+	font-size: 75px;
+	vertical-align: text-top;
+}
+
+#maxAge {
+	font-size: 75px;
+}
+
+#totalCount {
+	font-size: 500px;
+}
