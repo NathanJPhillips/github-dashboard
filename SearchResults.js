@@ -3,12 +3,25 @@ function min(collection) { return collection.reduce(function (min, x) { return x
 function max(collection) { return collection.reduce(function (max, x) { return x < max ? max : x; }, NaN); }
 function average(collection) { return sum(collection) / collection.length; }
 
+
+function PullRequest(data) {
+  var self = this;
+  ko.mapping.fromJS(data, {}, self);
+
+  self.age = ko.computed(function () { return new Date() - new Date(self.created_at()); });
+}
+
 function SearchResults() {
   var self = this;
 
-  self.pullRequests = ko.observableArray([]);
+  self.pullRequests =
+    ko.mapping.fromJS([],
+      {
+        key: function(data) { return ko.utils.unwrapObservable(data.id); },
+        create: function(options) { return new PullRequest(options.data); }
+      });
   self.totalPRCount = ko.observable(0);
-  self.pullRequestAges = function () { return self.pullRequests().map(function (item) { return new Date() - new Date(item.created_at); }); };
+  self.pullRequestAges = function () { return self.pullRequests().map(function (item) { return item.age(); }); };
   self.averagePRAge = ko.computed(function () { return average(self.pullRequestAges()); });
   self.minPRAge = ko.computed(function () { return min(self.pullRequestAges()); })
   self.maxPRAge = ko.computed(function () { return max(self.pullRequestAges()); })
@@ -39,7 +52,7 @@ function SearchResults() {
           }
           if (pullRequests.length != self.totalPRCount())
             self.errorMessage("Couldn't get all the PRs");
-          self.pullRequests(pullRequests);
+          ko.mapping.fromJS(pullRequests, {}, self.pullRequests);
         })
         .always(function () { self.activeRequests(self.activeRequests() - 1); });
       }
