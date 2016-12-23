@@ -21,15 +21,24 @@ function SearchResults() {
         create: function(options) { return new PullRequest(options.data); }
       });
   self.totalPRCount = ko.observable(0);
-  self.pullRequestAges = function () { return self.pullRequests().map(function (item) { return item.age(); }); };
+  self.pullRequestAges = function () { return self.pullRequests().map(function (pr) { return pr.age(); }); };
   self.averagePRAge = ko.computed(function () { return average(self.pullRequestAges()); });
   self.minPRAge = ko.computed(function () { return min(self.pullRequestAges()); })
   self.maxPRAge = ko.computed(function () { return max(self.pullRequestAges()); })
 
+  self.prCountByAgeInWeeks = ko.computed(function () {
+    var map = new Array();
+    self.pullRequests().forEach(function(pr) {
+      var weeks = Math.floor(pr.age() / 1000 / 60 / 60 / 24 / 7);
+      map[weeks] = (map[weeks] ? map[weeks] : 0) + 1;
+    });
+    return _.range(26).map(function (weeks) { return map[weeks] ? map[weeks] : 0; });
+  });
+
   self.errorMessage = ko.observable();
   self.activeRequests = ko.observable(0);
-  self.loading = ko.computed(function () { self.activeRequests() == 0; });
-  self.uninitialised = ko.computed(function () { return self.pullRequests().length == 0; });
+  self.loading = ko.pureComputed(function () { self.activeRequests() == 0; });
+  self.uninitialised = ko.pureComputed(function () { return self.pullRequests().length == 0; });
 
   self.update =
     function () {
