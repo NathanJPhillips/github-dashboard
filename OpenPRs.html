@@ -11,23 +11,25 @@
   </head>
   <body>
     <div data-bind="visible: uninitialised">
-      <p>Loading...</p>
+      <p class="loadingWaiter">Loading...</p>
     </div>
     <div class="container-fluid" data-bind="visible: !uninitialised()">
       <div class="row">
         <div class="col-md-12">
-          <span id="totalCount" data-bind="text: totalCount"></span> PRs
+          <span class="caption">Open PRs:</span>
+          <span class="mainFigure" data-bind="text: totalCount"></span>
         </div>
       </div>
       <div class="row">
         <div class="col-md-12">
-          <span id="minAge" data-bind="text: minAge"></span><span data-bind="text: averageAge"></span><span id="maxAge" data-bind="text: maxAge"></span> days old
+          <span class="caption">Age (days):</span>
+          </span><span class="mainFigure" data-bind="text: averageAge"></span><span class="subscriptFigure" data-bind="text: maxAge"></span>
         </div>
       </div>
     </div>
     <div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.1/knockout-min.js" integrity="sha256-PX9zWVaICUCeklczWaS9DLBb9uGN7pCkCT0Kyz1elRo=" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.1/knockout-min.js" integrity="sha256-PX9zWVaICUCeklczWaS9DLBb9uGN7pCkCT0Kyz1elRo=" crossorigin="anonymous"></script>
     <script src="credentials.js"></script>
     <script src="SearchResults.js"></script>
     <script>

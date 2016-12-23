@@ -4,7 +4,10 @@ body {
 	background-image: url("http://www.diffblue.com/img/bg/1a.jpg");
 	background-size: cover;
 	color: white;
-	font-size: 200px;
+	font-size: 150px;
+}
+
+.loadingWaiter {
 	text-align: center;
 }
 
@@ -12,17 +15,21 @@ p {
 	margin: 0;
 }
 
-#minAge {
+.superscriptFigure {
 	font-size: 75px;
 	vertical-align: text-top;
-	color: #1C75BC;
 }
 
-#maxAge {
+.subscriptFigure {
 	font-size: 75px;
-	color: #1C75BC;
 }
 
-#totalCount {
-	font-size: 500px;
+.caption {
+	color: #1C75BC;
+	font-size: 150px;
+}
+
+.mainFigure {
+	color: white;
+	font-size: 300px;
 }
