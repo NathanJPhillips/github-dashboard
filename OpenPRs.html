@@ -1,19 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Open PR count on GitHub</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="diffblue.css" />
   </head>
   <body>
     <div data-bind="visible: uninitialised">
       <p>Loading...</p>
     </div>
-    <div data-bind="visible: !uninitialised()">
-      <p>
-        <span id="totalCount" data-bind="text: totalCount"></span> PRs<br />
-        <span id="minAge" data-bind="text: minAge"></span><span data-bind="text: averageAge"></span><span id="maxAge" data-bind="text: maxAge"></span> days old
-      </p>
+    <div class="container-fluid" data-bind="visible: !uninitialised()">
+      <div class="row">
+        <div class="col-md-12">
+          <span id="totalCount" data-bind="text: totalCount"></span> PRs
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <span id="minAge" data-bind="text: minAge"></span><span data-bind="text: averageAge"></span><span id="maxAge" data-bind="text: maxAge"></span> days old
+        </div>
+      </div>
     </div>
+    <div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.1/knockout-min.js" integrity="sha256-PX9zWVaICUCeklczWaS9DLBb9uGN7pCkCT0Kyz1elRo=" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
     <script src="credentials.js"></script>
@@ -27,5 +39,6 @@
       });
     </script>
     <script src="CheckForUpdates.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
   </body>
 </html>

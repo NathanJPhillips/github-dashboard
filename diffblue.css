@@ -3,12 +3,12 @@ body {
 	font-family: "Glacial", sans-serif;
 	background-image: url("http://www.diffblue.com/img/bg/1a.jpg");
 	background-size: cover;
-}
-
-p {
 	color: white;
 	font-size: 200px;
 	text-align: center;
+}
+
+p {
 	margin: 0;
 }
 
