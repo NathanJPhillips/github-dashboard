@@ -17,19 +17,20 @@
       <div class="row">
         <div class="col-md-12">
           <span class="caption">Open PRs:</span>
-          <span class="mainFigure" data-bind="text: totalCount"></span>
+          <span class="mainFigure" data-bind="text: totalPRCount"></span>
         </div>
       </div>
       <div class="row">
         <div class="col-md-12">
           <span class="caption">Age (days):</span>
-          </span><span class="mainFigure" data-bind="text: averageAge"></span><span class="subscriptFigure" data-bind="text: maxAge"></span>
+          </span><span class="mainFigure" data-bind="text: averagePRAge.extend({ dateUnits: 'days', numeric: 1 })"></span><span class="subscriptFigure" data-bind="text: maxPRAge.extend({ dateUnits: 'days', numeric: 1 })"></span>
         </div>
       </div>
     </div>
     <div>
     <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.1/knockout-min.js" integrity="sha256-PX9zWVaICUCeklczWaS9DLBb9uGN7pCkCT0Kyz1elRo=" crossorigin="anonymous"></script>
+    <script src="knockout-extenders.js"></script>
     <script src="credentials.js"></script>
     <script src="SearchResults.js"></script>
     <script>
