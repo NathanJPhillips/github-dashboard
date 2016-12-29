@@ -24,17 +24,28 @@ function SearchResults() {
   self.openPullRequests = ko.pureComputed(function () {
     return self.pullRequests().filter(function (pr) { return pr.closed_at() == null; });
   });
-  self.openPullRequestAges = function () { return self.openPullRequests().map(function (pr) { return pr.age(); }); };
-  self.averageOpenPRAge = ko.computed(function () { return average(self.openPullRequestAges()); });
-  self.minOpenPRAge = ko.computed(function () { return min(self.openPullRequestAges()); })
-  self.maxOpenPRAge = ko.computed(function () { return max(self.openPullRequestAges()); })
+  self.closedPullRequests = ko.pureComputed(function () {
+    return self.pullRequests().filter(function (pr) { return pr.closed_at() != null; });
+  });
+  self.pullRequestAges = function (open) {
+    return (open ? self.openPullRequests() : self.closedPullRequests()).map(function (pr) { return pr.age(); });
+  };
+  self.averagePRAge = function (open) {
+    return ko.computed(function () { return average(self.pullRequestAges(open)); });
+  };
+  self.minPRAge = function (open) {
+    return ko.computed(function () { return min(self.pullRequestAges(open)); });
+  };
+  self.maxPRAge = function (open) {
+    return ko.computed(function () { return max(self.pullRequestAges(open)); });
+  };
 
-  self.openPRCountByAgeInWeeks = function (limit) {
+  self.prCountByAgeInWeeks = function (open, limit) {
     return ko.computed(function () {
       var map = new Array();
-      self.openPullRequests()
-        .forEach(function (pr) {
-          var weeks = Math.floor(pr.age() / 1000 / 60 / 60 / 24 / 7);
+      self.pullRequestAges(open)
+        .forEach(function (age) {
+          var weeks = Math.floor(age / 1000 / 60 / 60 / 24 / 7);
           map[weeks] = (map[weeks] ? map[weeks] : 0) + 1;
         });
       var cumulative = [];

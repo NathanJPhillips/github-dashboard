@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Open Pull Request count on GitHub</title>
+    <title>Pull Request count on GitHub</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="diffblue.css" />
@@ -14,56 +14,112 @@
       <p class="loadingWaiter">Loading...</p>
     </div>
     <div class="container-fluid" data-bind="visible: !uninitialised()">
-      <div class="row">
-        <div class="col-md-10">
-          <span class="caption">Open PRs:</span>
-          <span class="mainFigure" data-bind="text: openPullRequests().length"></span>
-        </div>
-        <div class="col-md-2">
-          <canvas class="chart"></canvas>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-6">
-          <canvas class="chart"
-            data-bind="
-              chartType: 'bar', 
-              chartData: {
-                labels: _.range(26),
-                datasets: [{
-                  label: 'PRs by Age',
-                  data: openPRCountByAgeInWeeks(26)(),
-                  backgroundColor: 'rgba(255, 159, 64, 0.2)',
-                  borderColor: 'rgba(255, 159, 64, 1)',
-                  borderWidth: 1
-                }]
-              },
-              chartOptions : {
-                scales: {
-                  xAxes : [{
-                    scaleLabel: {
-                      display: true,
-                      labelString: 'Weeks Old'
-                    }
-                  }],
-                  yAxes: [{
-                    ticks: {
-                      beginAtZero: true
-                    }
-                  }]
-                },
-                legend: {
-                  display: false
-                }
-              }">></canvas>
-        </div>
-        <div class="col-md-6">
-          <span class="caption">Age (days):</span></br />
-          </span><span class="mainFigure" data-bind="text: averageOpenPRAge.extend({ dateUnits: 'days', numeric: 1 })"></span><span class="subscriptFigure" data-bind="text: maxOpenPRAge.extend({ dateUnits: 'days', numeric: 1 })"></span>
+      <div id="myCarousel" class="carousel slide" data-ride="carousel">
+        <div class="carousel-inner" role="listbox">
+          <div class="item active">
+            <div class="row">
+              <div class="col-md-10">
+                <span class="caption">Open PRs:</span>
+                <span class="mainFigure" data-bind="text: openPullRequests().length"></span>
+              </div>
+              <div class="col-md-2">
+                <canvas class="chart"></canvas>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <canvas class="chart"
+                  data-bind="
+                    chartType: 'bar', 
+                    chartData: {
+                      labels: _.range(26),
+                      datasets: [{
+                        label: 'PRs by Age',
+                        data: prCountByAgeInWeeks(true, 26)(),
+                        backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        borderWidth: 1
+                      }]
+                    },
+                    chartOptions : {
+                      scales: {
+                        xAxes : [{
+                          scaleLabel: {
+                            display: true,
+                            labelString: 'Weeks Old'
+                          }
+                        }],
+                        yAxes: [{
+                          ticks: {
+                            beginAtZero: true
+                          }
+                        }]
+                      },
+                      legend: {
+                        display: false
+                      }
+                    }">></canvas>
+              </div>
+              <div class="col-md-6">
+                <span class="caption">Age (days):</span></br />
+                </span><span class="mainFigure" data-bind="text: averagePRAge(true).extend({ dateUnits: 'days', numeric: 1 })"></span><span class="subscriptFigure" data-bind="text: maxPRAge(true).extend({ dateUnits: 'days', numeric: 1 })"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="row">
+              <div class="col-md-10">
+                <span class="caption">Closed PRs:</span>
+                <span class="mainFigure" data-bind="text: closedPullRequests().length"></span>
+              </div>
+              <div class="col-md-2">
+                <canvas class="chart"></canvas>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <canvas class="chart"
+                  data-bind="
+                    chartType: 'bar', 
+                    chartData: {
+                      labels: _.range(26),
+                      datasets: [{
+                        label: 'PRs by Age',
+                        data: prCountByAgeInWeeks(false, 26)(),
+                        backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        borderWidth: 1
+                      }]
+                    },
+                    chartOptions : {
+                      scales: {
+                        xAxes : [{
+                          scaleLabel: {
+                            display: true,
+                            labelString: 'Weeks Old'
+                          }
+                        }],
+                        yAxes: [{
+                          ticks: {
+                            beginAtZero: true
+                          }
+                        }]
+                      },
+                      legend: {
+                        display: false
+                      }
+                    }">></canvas>
+              </div>
+              <div class="col-md-6">
+                <span class="caption">Age (days):</span></br />
+                </span><span class="mainFigure" data-bind="text: averagePRAge(false).extend({ dateUnits: 'days', numeric: 1 })"></span><span class="subscriptFigure" data-bind="text: maxPRAge(false).extend({ dateUnits: 'days', numeric: 1 })"></span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <div>
     <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.1/knockout-min.js" integrity="sha256-PX9zWVaICUCeklczWaS9DLBb9uGN7pCkCT0Kyz1elRo=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js" integrity="sha256-gaGobNk1cPaj0abcVmyZxUYgCPsueCJwN5i4DjC4BS0=" crossorigin="anonymous"></script>
