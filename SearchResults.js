@@ -14,25 +14,29 @@ function PullRequest(data) {
 function SearchResults() {
   var self = this;
 
+  self.totalPRCount = ko.observable(0);
   self.pullRequests =
     ko.mapping.fromJS([],
       {
         key: function(data) { return ko.utils.unwrapObservable(data.id); },
         create: function(options) { return new PullRequest(options.data); }
       });
-  self.totalPRCount = ko.observable(0);
-  self.pullRequestAges = function () { return self.pullRequests().map(function (pr) { return pr.age(); }); };
-  self.averagePRAge = ko.computed(function () { return average(self.pullRequestAges()); });
-  self.minPRAge = ko.computed(function () { return min(self.pullRequestAges()); })
-  self.maxPRAge = ko.computed(function () { return max(self.pullRequestAges()); })
+  self.openPullRequests = ko.pureComputed(function () {
+    return self.pullRequests().filter(function (pr) { return pr.closed_at() == null; });
+  });
+  self.openPullRequestAges = function () { return self.openPullRequests().map(function (pr) { return pr.age(); }); };
+  self.averageOpenPRAge = ko.computed(function () { return average(self.openPullRequestAges()); });
+  self.minOpenPRAge = ko.computed(function () { return min(self.openPullRequestAges()); })
+  self.maxOpenPRAge = ko.computed(function () { return max(self.openPullRequestAges()); })
 
-  self.prCountByAgeInWeeks = function (limit) {
+  self.openPRCountByAgeInWeeks = function (limit) {
     return ko.computed(function () {
       var map = new Array();
-      self.pullRequests().forEach(function (pr) {
-        var weeks = Math.floor(pr.age() / 1000 / 60 / 60 / 24 / 7);
-        map[weeks] = (map[weeks] ? map[weeks] : 0) + 1;
-      });
+      self.openPullRequests()
+        .forEach(function (pr) {
+          var weeks = Math.floor(pr.age() / 1000 / 60 / 60 / 24 / 7);
+          map[weeks] = (map[weeks] ? map[weeks] : 0) + 1;
+        });
       var cumulative = [];
       _.range(limit).reduce(function (c, i) {
         var count = c + (map[i] ? map[i] : 0);
@@ -70,12 +74,12 @@ function SearchResults() {
             return;   // Don't update until read all pages
           }
           if (pullRequests.length != self.totalPRCount())
-            self.errorMessage("Couldn't get all the PRs");
+            self.errorMessage("Couldn't get all the pull requests");
           ko.mapping.fromJS(pullRequests, {}, self.pullRequests);
         })
         .always(function () { self.activeRequests(self.activeRequests() - 1); });
       }
       // Load the first page
-      getPage("https://api.github.com/search/issues?q=user%3Adiffblue+type%3Apr+is%3Aopen");
+      getPage("https://api.github.com/search/issues?q=user%3Adiffblue+type%3Apr");
     };
 }

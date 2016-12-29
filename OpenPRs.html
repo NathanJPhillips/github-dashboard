@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Open PR count on GitHub</title>
+    <title>Open Pull Request count on GitHub</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="diffblue.css" />
@@ -17,7 +17,7 @@
       <div class="row">
         <div class="col-md-10">
           <span class="caption">Open PRs:</span>
-          <span class="mainFigure" data-bind="text: totalPRCount"></span>
+          <span class="mainFigure" data-bind="text: openPullRequests().length"></span>
         </div>
         <div class="col-md-2">
           <canvas class="chart"></canvas>
@@ -32,7 +32,7 @@
                 labels: _.range(26),
                 datasets: [{
                   label: 'PRs by Age',
-                  data: prCountByAgeInWeeks(26)(),
+                  data: openPRCountByAgeInWeeks(26)(),
                   backgroundColor: 'rgba(255, 159, 64, 0.2)',
                   borderColor: 'rgba(255, 159, 64, 1)',
                   borderWidth: 1
@@ -59,7 +59,7 @@
         </div>
         <div class="col-md-6">
           <span class="caption">Age (days):</span></br />
-          </span><span class="mainFigure" data-bind="text: averagePRAge.extend({ dateUnits: 'days', numeric: 1 })"></span><span class="subscriptFigure" data-bind="text: maxPRAge.extend({ dateUnits: 'days', numeric: 1 })"></span>
+          </span><span class="mainFigure" data-bind="text: averageOpenPRAge.extend({ dateUnits: 'days', numeric: 1 })"></span><span class="subscriptFigure" data-bind="text: maxOpenPRAge.extend({ dateUnits: 'days', numeric: 1 })"></span>
         </div>
       </div>
     </div>
