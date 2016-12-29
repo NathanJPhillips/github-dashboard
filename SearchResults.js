@@ -26,14 +26,24 @@ function SearchResults() {
   self.minPRAge = ko.computed(function () { return min(self.pullRequestAges()); })
   self.maxPRAge = ko.computed(function () { return max(self.pullRequestAges()); })
 
-  self.prCountByAgeInWeeks = ko.computed(function () {
-    var map = new Array();
-    self.pullRequests().forEach(function(pr) {
-      var weeks = Math.floor(pr.age() / 1000 / 60 / 60 / 24 / 7);
-      map[weeks] = (map[weeks] ? map[weeks] : 0) + 1;
+  self.prCountByAgeInWeeks = function (limit) {
+    return ko.computed(function () {
+      var map = new Array();
+      self.pullRequests().forEach(function (pr) {
+        var weeks = Math.floor(pr.age() / 1000 / 60 / 60 / 24 / 7);
+        map[weeks] = (map[weeks] ? map[weeks] : 0) + 1;
+      });
+      var cumulative = [];
+      _.range(limit).reduce(function (c, i) {
+        var count = c + (map[i] ? map[i] : 0);
+        cumulative.push(count);
+        return count;
+      }, 0);
+      return cumulative;
+      // Non-cumulative version
+      //return _.range(limit).map(function (weeks) { return map[weeks] ? map[weeks] : 0; });
     });
-    return _.range(26).map(function (weeks) { return map[weeks] ? map[weeks] : 0; });
-  });
+  };
 
   self.errorMessage = ko.observable();
   self.activeRequests = ko.observable(0);
