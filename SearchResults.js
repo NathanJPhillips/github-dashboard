@@ -8,7 +8,9 @@ function PullRequest(data) {
   var self = this;
   ko.mapping.fromJS(data, {}, self);
 
-  self.age = ko.computed(function () { return new Date() - new Date(self.created_at()); });
+  self.age = ko.computed(function () {
+    return (self.closed_at() ? new Date(self.closed_at()) : new Date()) - new Date(self.created_at());
+  });
 }
 
 function SearchResults() {
