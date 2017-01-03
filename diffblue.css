@@ -4,11 +4,12 @@ body {
 	background-image: url("http://www.diffblue.com/img/bg/1a.jpg");
 	background-size: cover;
 	color: white;
-	font-size: 150px;
+	font-size: 100px;
 }
 
 .loadingWaiter {
 	text-align: center;
+	font-size: 300px;
 }
 
 p {
@@ -26,12 +27,12 @@ p {
 
 .caption {
 	color: #1C75BC;
-	font-size: 150px;
+	font-size: 100px;
 }
 
 .mainFigure {
 	color: white;
-	font-size: 300px;
+	font-size: 200px;
 }
 
 .chart {
