@@ -14,6 +14,8 @@ ko.extenders.dateUnits = function(target, units) {
 		read: function() {
 			var result = target();
 			switch (units) {
+				case "years":
+					return result / 365.25 / 24 / 60 / 60 / 1000;
 				case "weeks":
 					result /= 7;
 				case "days":

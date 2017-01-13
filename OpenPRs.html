@@ -150,6 +150,50 @@
               </div>
             </div>
           </div>
+
+          <div class="item">
+            <div class="row">
+              <div class="col-md-6">
+                <span class="caption">Jamie Score:</span><br />
+                <span class="mainFigure" data-bind="text: ko.computed(function () { return _.sum(agesOfPRsOpenAt(new Date())); }).extend({ dateUnits: 'years', numeric: 1 })"></span>
+              </div>
+              <div class="col-md-6">
+                <canvas class="chart"
+                  data-bind="
+                    chartType: 'line',
+                    chartData: function(data) {
+                      return {
+                        labels: data.labels,
+                        datasets: [{
+                          label: 'PRs by Age',
+                          data: data.data,
+                          backgroundColor: 'rgba(159, 255, 64, 0.2)',
+                          borderColor: 'rgba(159, 255, 64, 1)',
+                          borderWidth: 1
+                        }]
+                      };
+                    }(sumOfPRAgesHistory(11)),
+                    chartOptions : {
+                      scales: {
+                        xAxes : [{
+                          scaleLabel: {
+                            display: true,
+                            labelString: 'Date'
+                          }
+                        }],
+                        yAxes: [{
+                          ticks: {
+                            beginAtZero: true
+                          }
+                        }]
+                      },
+                      legend: {
+                        display: false
+                      }
+                    }">></canvas>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

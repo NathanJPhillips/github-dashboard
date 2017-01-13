@@ -1,7 +1,4 @@
-function sum(collection) { return collection.reduce(function (sum, x) { return sum + x }, 0); }
-function min(collection) { return collection.reduce(function (min, x) { return x > min ? min : x; }, NaN); }
-function max(collection) { return collection.reduce(function (max, x) { return x < max ? max : x; }, NaN); }
-function average(collection) { return sum(collection) / collection.length; }
+function average(collection) { return _.sum(collection) / collection.length; }
 
 
 function PullRequest(data) {
@@ -9,15 +6,18 @@ function PullRequest(data) {
   ko.mapping.fromJS(data, {}, self);
 
   self.createdAt = new Date(self.created_at());
-  self.closedAt = self.closed_at() ? new Date(self.closed_at()) : null;
-  self.age = (self.closedAt ? self.closedAt : new Date()) - self.createdAt;
+  self.isOpen = self.closed_at() == null;
+  self.closedAt = self.isOpen ? null : new Date(self.closed_at());
+  self.age = (self.isOpen ? new Date() : self.closedAt) - self.createdAt;
 
   self.isOpenAtDate = function (when) {
-    return self.createdAt <= when && (self.closedAt == null || self.closedAt > when);
+    return self.createdAt <= when && (self.isOpen || self.closedAt > when);
   };
 }
 
-var msInAWeek = 1000 * 60 * 60 * 24 * 7;
+var msInADay = 1000 * 60 * 60 * 24,
+  msInAWeek = msInADay * 7,
+  msInAYear = msInADay * 365.25;
 
 function SearchResults() {
   var self = this;
@@ -30,11 +30,14 @@ function SearchResults() {
         create: function(options) { return new PullRequest(options.data); }
       });
   self.openPullRequests = ko.pureComputed(function () {
-    return self.pullRequests().filter(function (pr) { return pr.closed_at() == null; });
+    return self.pullRequests().filter(function (pr) { return pr.isOpen; });
   });
   self.closedPullRequests = ko.pureComputed(function () {
-    return self.pullRequests().filter(function (pr) { return pr.closed_at() != null; });
+    return self.pullRequests().filter(function (pr) { return !pr.isOpen; });
   });
+  self.openPRsAtDate = function(when) {
+    return self.pullRequests().filter(function (pr) { return pr.isOpenAtDate(when); });
+  };
   self.pullRequestAges = function (open) {
     return (open ? self.openPullRequests() : self.closedPullRequests()).map(function (pr) { return pr.age; });
   };
@@ -42,10 +45,13 @@ function SearchResults() {
     return ko.computed(function () { return average(self.pullRequestAges(open)); });
   };
   self.minPRAge = function (open) {
-    return ko.computed(function () { return min(self.pullRequestAges(open)); });
+    return ko.computed(function () { return _.min(self.pullRequestAges(open)); });
   };
   self.maxPRAge = function (open) {
-    return ko.computed(function () { return max(self.pullRequestAges(open)); });
+    return ko.computed(function () { return _.max(self.pullRequestAges(open)); });
+  };
+  self.agesOfPRsOpenAt = function (when) {
+    return self.openPRsAtDate(when).map(function (pr) { return when - pr.createdAt; });
   };
 
   self.prCountByAgeInWeeks = function (open, limit) {
@@ -66,19 +72,23 @@ function SearchResults() {
     //return _.range(limit).map(function (weeks) { return map[weeks] ? map[weeks] : 0; });
   };
 
-  self.openPRCountHistory = function (limit) {
-    var pullRequests = self.pullRequests();
+
+  function createHistory(f, limit) {
     var dates = [];
     var openPRCountHistory = [];
     var when = new Date();
     for (var week = 0; week < limit; ++week) {
       dates.push(new Date(when).toLocaleDateString());
-      openPRCountHistory.push(pullRequests.filter(function (pr) {
-        return pr.isOpenAtDate(when);
-      }).length);
+      openPRCountHistory.push(f(when));
       when -= msInAWeek;
     }
     return { labels: dates.reverse(), data: openPRCountHistory.reverse() };
+  };
+  self.openPRCountHistory = function (limit) {
+    return createHistory(function (when) { return self.openPRsAtDate(when).length; }, limit);
+  };
+  self.sumOfPRAgesHistory = function (limit) {
+    return createHistory(function (when) { return _.sum(self.agesOfPRsOpenAt(when)) / msInAYear; }, limit);
   };
 
   self.errorMessage = ko.observable();
@@ -110,6 +120,11 @@ function SearchResults() {
           ko.mapping.fromJS(pullRequests, {}, self.pullRequests);
         })
         .fail(function (jqXHR, textStatus, errorThrown) {
+          if (jqXHR.getResponseHeader("X-RateLimit-Remaining") <= 0) {
+            var rateLimitReset = new Date(parseInt(jqXHR.getResponseHeader("X-RateLimit-Reset")) * 1000);
+            console.log("Rate limit exceeded, retrying at " + rateLimitReset.toLocaleTimeString());
+            setTimeout(function() { getPage(uri); }, rateLimitReset - new Date());
+          }
         })
         .always(function () { self.activeRequests(self.activeRequests() - 1); });
       }
