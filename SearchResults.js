@@ -129,6 +129,6 @@ function SearchResults() {
         .always(function () { self.activeRequests(self.activeRequests() - 1); });
       }
       // Load the first page
-      getPage("https://api.github.com/search/issues?q=user%3Adiffblue+type%3Apr");
+      getPage("https://api.github.com/search/issues?q=user%3Adiffblue+type%3Apr&per_page=100");
     };
 }
