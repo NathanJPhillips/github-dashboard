@@ -155,7 +155,7 @@
             <div class="row">
               <div class="col-md-6">
                 <span class="caption">Jamie Score:</span><br />
-                <span class="mainFigure" data-bind="text: ko.computed(function () { return _.sum(agesOfPRsOpenAt(new Date())); }).extend({ dateUnits: 'years', numeric: 1 })"></span>
+                <span class="mainFigure" data-bind="text: sumOfPRAges.extend({ dateUnits: 'years', numeric: 1 })"></span>
               </div>
               <div class="col-md-6">
                 <canvas class="chart"
@@ -192,6 +192,10 @@
                       }
                     }">></canvas>
               </div>
+            </div>
+          <div class="row">
+            <div class="col-md-12">
+              <img data-bind="attr: { src: 'images/jamie/' + jamiesDisapproval() + '.jpg' }" height="300" width="200" style="text-align: center" />
             </div>
           </div>
         </div>

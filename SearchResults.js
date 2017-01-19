@@ -42,13 +42,13 @@ function SearchResults() {
     return (open ? self.openPullRequests() : self.closedPullRequests()).map(function (pr) { return pr.age; });
   };
   self.averagePRAge = function (open) {
-    return ko.computed(function () { return average(self.pullRequestAges(open)); });
+    return ko.pureComputed(function () { return average(self.pullRequestAges(open)); });
   };
   self.minPRAge = function (open) {
-    return ko.computed(function () { return _.min(self.pullRequestAges(open)); });
+    return ko.pureComputed(function () { return _.min(self.pullRequestAges(open)); });
   };
   self.maxPRAge = function (open) {
-    return ko.computed(function () { return _.max(self.pullRequestAges(open)); });
+    return ko.pureComputed(function () { return _.max(self.pullRequestAges(open)); });
   };
   self.agesOfPRsOpenAt = function (when) {
     return self.openPRsAtDate(when).map(function (pr) { return when - pr.createdAt; });
@@ -90,6 +90,8 @@ function SearchResults() {
   self.sumOfPRAgesHistory = function (limit) {
     return createHistory(function (when) { return _.sum(self.agesOfPRsOpenAt(when)) / msInAYear; }, limit);
   };
+  self.sumOfPRAges = ko.pureComputed(function () { return _.sum(self.agesOfPRsOpenAt(new Date())); });
+  self.jamiesDisapproval = ko.pureComputed(function() { return Math.round(9 - Math.log(self.sumOfPRAges() / 263000000)); });
 
   self.errorMessage = ko.observable();
   self.activeRequests = ko.observable(0);
