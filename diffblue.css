@@ -40,3 +40,8 @@ p {
 	height: 100%;
 	vertical-align: middle;
 }
+img.centered {
+    border: none;
+    display: block;
+    margin: 0 auto;
+}
