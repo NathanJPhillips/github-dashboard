@@ -45,3 +45,8 @@ img.centered {
     display: block;
     margin: 0 auto;
 }
+span.error {
+	float: right;
+	color: red;
+	font-size: 50px;
+}

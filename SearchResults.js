@@ -94,6 +94,10 @@ function SearchResults() {
   self.jamiesDisapproval = ko.pureComputed(function() { return Math.round(9 - Math.log(self.sumOfPRAges() / 263000000)); });
 
   self.errorMessage = ko.observable();
+  self.errorMessage.subscribe(function(newValue) {
+    if (newValue != null)
+      console.log(newValue);
+  });
   self.activeRequests = ko.observable(0);
   self.loading = ko.pureComputed(function () { self.activeRequests() == 0; });
   self.uninitialised = ko.pureComputed(function () { return self.pullRequests().length == 0; });
@@ -105,6 +109,7 @@ function SearchResults() {
       function getPage(uri) {
         self.activeRequests(self.activeRequests() + 1);
         $.getJSON(uri, function (data, textStatus, jqXHR) {
+          self.errorMessage(null);
           self.totalPRCount(data.total_count);
           // Get the pull requests
           pullRequests = pullRequests.concat(data.items);
@@ -124,9 +129,11 @@ function SearchResults() {
         .fail(function (jqXHR, textStatus, errorThrown) {
           if (jqXHR.getResponseHeader("X-RateLimit-Remaining") <= 0) {
             var rateLimitReset = new Date(parseInt(jqXHR.getResponseHeader("X-RateLimit-Reset")) * 1000);
-            console.log("Rate limit exceeded, retrying at " + rateLimitReset.toLocaleTimeString());
+            self.errorMessage("Rate limit exceeded, retrying at " + rateLimitReset.toLocaleTimeString());
             setTimeout(function() { getPage(uri); }, rateLimitReset - new Date());
+            return;
           }
+          self.errorMessage("Failure response from Github: " + jqXHR.statusText);
         })
         .always(function () { self.activeRequests(self.activeRequests() - 1); });
       }
