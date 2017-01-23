@@ -91,7 +91,7 @@ function SearchResults() {
     return createHistory(function (when) { return _.sum(self.agesOfPRsOpenAt(when)) / msInAYear; }, limit);
   };
   self.sumOfPRAges = ko.pureComputed(function () { return _.sum(self.agesOfPRsOpenAt(new Date())); });
-  self.jamiesDisapproval = ko.pureComputed(function() { return Math.round(9 - Math.log(self.sumOfPRAges() / 263000000)); });
+  self.jamiesDisapproval = ko.pureComputed(function() { return Math.round(Math.log(1 + self.sumOfPRAges() / 263000000)); });
 
   self.errorMessage = ko.observable();
   self.errorMessage.subscribe(function(newValue) {
