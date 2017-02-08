@@ -98,8 +98,8 @@ function SearchResults() {
 
   self.errorMessage = ko.observable();
   self.errorMessage.subscribe(function(newValue) {
-    if (newValue != null)
-      console.log(newValue);
+  if (newValue != null)
+    console.log(newValue);
   });
   self.activeRequests = ko.observable(0);
   self.loading = ko.pureComputed(function () { self.activeRequests() == 0; });
