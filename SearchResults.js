@@ -26,7 +26,7 @@ function SearchResults() {
   self.pullRequests =
     ko.mapping.fromJS([],
       {
-        key: function(data) { return ko.utils.unwrapObservable(data.id); },
+        key: function(data) { return data && ko.utils.unwrapObservable(data.id); },
         create: function(options) { return new PullRequest(options.data); }
       });
   self.openPullRequests = ko.pureComputed(function () {
