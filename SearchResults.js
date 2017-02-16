@@ -26,7 +26,7 @@ function SearchResults() {
   self.pullRequests =
     ko.mapping.fromJS([],
       {
-        key: function(data) { return ko.utils.unwrapObservable(data.id); },
+        key: function(data) { return data && ko.utils.unwrapObservable(data.id); },
         create: function(options) { return new PullRequest(options.data); }
       });
   self.openPullRequests = ko.pureComputed(function () {
@@ -98,8 +98,8 @@ function SearchResults() {
 
   self.errorMessage = ko.observable();
   self.errorMessage.subscribe(function(newValue) {
-    if (newValue != null)
-      console.log(newValue);
+  if (newValue != null)
+    console.log(newValue);
   });
   self.activeRequests = ko.observable(0);
   self.loading = ko.pureComputed(function () { self.activeRequests() == 0; });
