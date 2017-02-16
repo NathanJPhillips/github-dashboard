@@ -213,13 +213,13 @@
     <script src="knockout-chart-binding.js"></script>
     <script src="credentials.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.3/lodash.min.js"></script>
+    <script src="GitHub-utils.js"></script>
     <script src="SearchResults.js"></script>
     <script>
       var viewModel = new SearchResults();
       $(function () {
-        viewModel.update();
+        viewModel.load();
         ko.applyBindings(viewModel);
-        setInterval(viewModel.update, 5 * 60 * 1000);
       });
     </script>
     <script src="CheckForUpdates.js"></script>
