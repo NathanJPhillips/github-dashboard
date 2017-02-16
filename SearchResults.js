@@ -6,6 +6,7 @@ function PullRequest(data) {
   ko.mapping.fromJS(data, {}, self);
 
   self.createdAt = new Date(self.created_at());
+  self.updatedAt = new Date(self.updated_at());
   self.isOpen = self.closed_at() == null;
   self.closedAt = self.isOpen ? null : new Date(self.closed_at());
   self.age = (self.isOpen ? new Date() : self.closedAt) - self.createdAt;
@@ -22,7 +23,6 @@ var msInADay = 1000 * 60 * 60 * 24,
 function SearchResults() {
   var self = this;
 
-  self.totalPRCount = ko.observable(0);
   self.pullRequests =
     ko.mapping.fromJS([],
       {
@@ -52,6 +52,9 @@ function SearchResults() {
   };
   self.agesOfPRsOpenAt = function (when) {
     return self.openPRsAtDate(when).map(function (pr) { return when - pr.createdAt; });
+  };
+  self.lastPRUpdate = function () {
+    return _.max(self.pullRequests().map(function (pr) { return pr.updatedAt; }));
   };
 
   self.prCountByAgeInWeeks = function (open, limit) {
@@ -102,42 +105,75 @@ function SearchResults() {
   self.loading = ko.pureComputed(function () { self.activeRequests() == 0; });
   self.uninitialised = ko.pureComputed(function () { return self.pullRequests().length == 0; });
 
+
+  function loadAllPages(query, onComplete) {
+    var totalCount;
+    var pullRequests = [];
+    // Function to load a page of results
+    function getPage(uri) {
+      self.activeRequests(self.activeRequests() + 1);
+      $.getJSON(uri, function (data, textStatus, jqXHR) {
+        self.errorMessage(null);
+        totalCount = data.total_count;
+        // Add the pull requests to the existing cache
+        pullRequests = pullRequests.concat(data.items);
+        // Get the link to the next page of results
+        var nextLinkSuffix = "; rel=\"next\"";
+        var linksHeader = jqXHR.getResponseHeader("Link");
+        if (linksHeader == null)
+          linksHeader = "";
+        var nextLinks = linksHeader.split(",").filter(function (link) { return link.endsWith(nextLinkSuffix); });
+        if (nextLinks.length > 0) {
+          var nextLink = nextLinks[0];
+          nextLink = nextLink.substring(1, nextLink.length - nextLinkSuffix.length - 1);
+          getPage(nextLink);
+        } else
+          onComplete(pullRequests, totalCount);
+      })
+      .fail(function (jqXHR, textStatus, errorThrown) {
+        if (jqXHR.getResponseHeader("X-RateLimit-Remaining") <= 0) {
+          var rateLimitReset = new Date(parseInt(jqXHR.getResponseHeader("X-RateLimit-Reset")) * 1000);
+          self.errorMessage("Rate limit exceeded, retrying at " + rateLimitReset.toLocaleTimeString());
+          setTimeout(function () { getPage(uri); }, rateLimitReset - new Date());
+          return;
+        }
+        self.errorMessage("Failure response from Github: " + jqXHR.statusText);
+      })
+      .always(function () { self.activeRequests(self.activeRequests() - 1); });
+    }
+    getPage("https://api.github.com/search/issues?q=" + encodeURIComponent(query) + "&sort=updated&order=asc&per_page=100");
+  }
+
+  var baseQuery = "user:diffblue type:pr";
+
   self.update =
-    function () {
-      var pullRequests = [];
-      // Function to load a page of results
-      function getPage(uri) {
-        self.activeRequests(self.activeRequests() + 1);
-        $.getJSON(uri, function (data, textStatus, jqXHR) {
-          self.errorMessage(null);
-          self.totalPRCount(data.total_count);
-          // Get the pull requests
-          pullRequests = pullRequests.concat(data.items);
-          // Get the link to the next page of results
-          var nextLinkSuffix = "; rel=\"next\"";
-          var nextLinks = jqXHR.getResponseHeader("Link").split(",").filter(function (link) { return link.endsWith(nextLinkSuffix); });
-          if (nextLinks.length > 0) {
-            var nextLink = nextLinks[0];
-            nextLink = nextLink.substring(1, nextLink.length - nextLinkSuffix.length - 1);
-            getPage(nextLink);
-            return;   // Don't update until read all pages
-          }
-          if (pullRequests.length != self.totalPRCount())
-            self.errorMessage("Couldn't get all the pull requests");
-          ko.mapping.fromJS(pullRequests, {}, self.pullRequests);
-        })
-        .fail(function (jqXHR, textStatus, errorThrown) {
-          if (jqXHR.getResponseHeader("X-RateLimit-Remaining") <= 0) {
-            var rateLimitReset = new Date(parseInt(jqXHR.getResponseHeader("X-RateLimit-Reset")) * 1000);
-            self.errorMessage("Rate limit exceeded, retrying at " + rateLimitReset.toLocaleTimeString());
-            setTimeout(function() { getPage(uri); }, rateLimitReset - new Date());
-            return;
-          }
-          self.errorMessage("Failure response from Github: " + jqXHR.statusText);
-        })
-        .always(function () { self.activeRequests(self.activeRequests() - 1); });
+    function (pullRequestCache, minimumResults) {
+      if (pullRequestCache.length === 0 || pullRequestCache.length >= minimumResults) {
+        //// Add the pull requests to the array - this is very slow
+        //for (let pr of data.items) {
+        //  var prIndex = self.pullRequests.mappedIndexOf(pr);
+        //  if (prIndex === -1)
+        //    self.pullRequests.mappedCreate(pr);
+        //  else
+        //    ko.mapping.fromJS(pr, {}, self.pullRequests[prIndex]);
+        //}
+        ko.mapping.fromJS(pullRequestCache, {}, self.pullRequests);
+      } else {
+        var lastUpdated = new Date(pullRequestCache[pullRequestCache.length - 1].updated_at);
+        loadAllPages(baseQuery + " updated:>=" + dateToGitHubISOString(lastUpdated), function (prs) {
+          self.update(pullRequestCache.concat(prs), minimumResults);
+        });
       }
-      // Load the first page
-      getPage("https://api.github.com/search/issues?q=user%3Adiffblue+type%3Apr&per_page=100");
+    };
+
+  self.load =
+    function () {
+      var totalCount;
+      // Load the first set of pages
+      loadAllPages(baseQuery, function (prs, count) {
+        totalCount = count;
+        self.update(prs, totalCount);
+      });
+      setInterval(function() { viewModel.update([], totalCount); }, 5 * 60 * 1000);
     };
 }

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6F767DB6-BC51-4170-8A02-175013E11A3F}"
 	ProjectSection(SolutionItems) = preProject
@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		credentials.js = credentials.js
 		diffblue.css = diffblue.css
 		github-dashboard = github-dashboard
+		GitHub-utils.js = GitHub-utils.js
 		knockout-chart-binding.js = knockout-chart-binding.js
 		knockout-extenders.js = knockout-extenders.js
 		OpenPRs.html = OpenPRs.html
