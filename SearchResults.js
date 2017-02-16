@@ -26,8 +26,8 @@ function SearchResults() {
   self.pullRequests =
     ko.mapping.fromJS([],
       {
-        key: function(data) { return ko.utils.unwrapObservable(data.id); },
-        create: function(options) { return new PullRequest(options.data); }
+        key: function (data) { return ko.utils.unwrapObservable(data.id); },
+        create: function (options) { return new PullRequest(options.data); }
       });
   self.openPullRequests = ko.pureComputed(function () {
     return self.pullRequests().filter(function (pr) { return pr.isOpen; });
@@ -127,7 +127,7 @@ function SearchResults() {
           var nextLink = nextLinks[0];
           nextLink = nextLink.substring(1, nextLink.length - nextLinkSuffix.length - 1);
           getPage(nextLink);
-        } else
+        } else if (onComplete)
           onComplete(pullRequests, totalCount);
       })
       .fail(function (jqXHR, textStatus, errorThrown) {
@@ -147,7 +147,7 @@ function SearchResults() {
   var baseQuery = "user:diffblue type:pr";
 
   self.update =
-    function (pullRequestCache, minimumResults) {
+    function (pullRequestCache, minimumResults, onComplete) {
       if (pullRequestCache.length === 0 || pullRequestCache.length >= minimumResults) {
         //// Add the pull requests to the array - this is very slow
         //for (let pr of data.items) {
@@ -157,11 +157,15 @@ function SearchResults() {
         //  else
         //    ko.mapping.fromJS(pr, {}, self.pullRequests[prIndex]);
         //}
-        ko.mapping.fromJS(pullRequestCache, {}, self.pullRequests);
+        if (pullRequestCache.length != 0)
+          ko.mapping.fromJS(pullRequestCache, {}, self.pullRequests);
+        console.log("Retrieved " + pullRequestCache.length + " pull requests, making a total of " + self.pullRequests().length + " at " + new Date());
+        if (onComplete)
+          onComplete();
       } else {
         var lastUpdated = new Date(pullRequestCache[pullRequestCache.length - 1].updated_at);
         loadAllPages(baseQuery + " updated:>=" + dateToGitHubISOString(lastUpdated), function (prs) {
-          self.update(pullRequestCache.concat(prs), minimumResults);
+          self.update(pullRequestCache.concat(prs), minimumResults, onComplete);
         });
       }
     };
@@ -172,8 +176,9 @@ function SearchResults() {
       // Load the first set of pages
       loadAllPages(baseQuery, function (prs, count) {
         totalCount = count;
-        self.update(prs, totalCount);
+        self.update(prs, totalCount, function () {
+          setInterval(function () { viewModel.update([], totalCount); }, 60 * 1000);
+        });
       });
-      setInterval(function() { viewModel.update([], totalCount); }, 5 * 60 * 1000);
     };
 }
