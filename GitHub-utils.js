@@ -1,7 +1,6 @@
 function dateToGitHubISOString(date) {
   function pad(number) {
-    var r = String(number);
-    return r.length === 1 ? '0' + r : r;
+    return (number < 10 ? '0' : '') + number;
   }
   return date.getUTCFullYear()
     + '-' + pad(date.getUTCMonth() + 1)
