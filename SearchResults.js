@@ -3,6 +3,8 @@ function average(collection) { return _.sum(collection) / collection.length; }
 
 function PullRequest(data) {
   var self = this;
+  if (!data)
+    console.log("Created PullRequest with no data");
   ko.mapping.fromJS(data, {}, self);
 
   self.createdAt = new Date(self.created_at());
@@ -163,26 +165,27 @@ function SearchResults() {
         requestAgain = false;
     } else
       requestAgain = false;
-    if (!requestAgain) {
-      if (!self.uninitialised()) {
-        // Add the pull requests to the array - this is very slow
-        for (let pr of pullRequestCache) {
-          var prIndex = self.pullRequests.mappedIndexOf(pr);
-          if (prIndex === -1)
-            self.pullRequests.mappedCreate(pr);
-          else
-            ko.mapping.fromJS(pr, {}, self.pullRequests[prIndex]);
-        }
-      } else
-        ko.mapping.fromJS(pullRequestCache, {}, self.pullRequests);
-      console.log("Retrieved " + pullRequestCache.length + " pull requests, making a total of " + self.pullRequests().length + " at " + new Date());
-      if (onComplete)
-        onComplete();
-    } else {
+    if (requestAgain) {
       loadAllPages(baseQuery + " updated:>=" + dateToGitHubISOString(self.lastPRUpdate()), function (prs) {
         processSearchResults(pullRequestCache.concat(prs), onComplete);
       });
+      return;
     }
+    if (self.uninitialised())
+      ko.mapping.fromJS(pullRequestCache, {}, self.pullRequests);
+    else {
+      // Add the pull requests to the array - this is very slow
+      for (let pr of pullRequestCache) {
+        var prIndex = self.pullRequests.mappedIndexOf(pr);
+        if (prIndex === -1)
+          self.pullRequests.mappedCreate(pr);
+        else
+          ko.mapping.fromJS(pr, {}, self.pullRequests[prIndex]);
+      }
+    }
+    console.log("Retrieved " + pullRequestCache.length + " pull requests, making a total of " + self.pullRequests().length + " at " + new Date());
+    if (onComplete)
+      onComplete();
   }
 
   var totalCount;
