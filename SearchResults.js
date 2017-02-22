@@ -26,7 +26,7 @@ function SearchResults() {
   self.pullRequests =
     ko.mapping.fromJS([],
       {
-        key: function (data) { return ko.utils.unwrapObservable(data.id); },
+        key: function (data) { return data ? ko.utils.unwrapObservable(data.id) : null; },
         create: function (options) { return new PullRequest(options.data); }
       });
   self.openPullRequests = ko.pureComputed(function () {
@@ -53,9 +53,7 @@ function SearchResults() {
   self.agesOfPRsOpenAt = function (when) {
     return self.openPRsAtDate(when).map(function (pr) { return when - pr.createdAt; });
   };
-  self.lastPRUpdate = function () {
-    return _.max(self.pullRequests().map(function (pr) { return pr.updatedAt; }));
-  };
+  self.lastPRUpdate = ko.observable();
 
   self.prCountByAgeInWeeks = function (open, limit) {
     var map = new Array();
@@ -131,7 +129,12 @@ function SearchResults() {
           onComplete(pullRequests, totalCount);
       })
       .fail(function (jqXHR, textStatus, errorThrown) {
-        if (jqXHR.getResponseHeader("X-RateLimit-Remaining") <= 0) {
+        if (jqXHR.status === 0) {
+          self.errorMessage("Could not connect to Github");
+          return;
+        }
+        var rateLimitRemaining = jqXHR.getResponseHeader("X-RateLimit-Remaining");
+        if (rateLimitRemaining !== null && rateLimitRemaining <= 0) {
           var rateLimitReset = new Date(parseInt(jqXHR.getResponseHeader("X-RateLimit-Reset")) * 1000);
           self.errorMessage("Rate limit exceeded, retrying at " + rateLimitReset.toLocaleTimeString());
           setTimeout(function () { getPage(uri); }, rateLimitReset - new Date());
@@ -146,39 +149,55 @@ function SearchResults() {
 
   var baseQuery = "user:diffblue type:pr";
 
-  self.update =
-    function (pullRequestCache, minimumResults, onComplete) {
-      if (pullRequestCache.length === 0 || pullRequestCache.length >= minimumResults) {
-        //// Add the pull requests to the array - this is very slow
-        //for (let pr of data.items) {
-        //  var prIndex = self.pullRequests.mappedIndexOf(pr);
-        //  if (prIndex === -1)
-        //    self.pullRequests.mappedCreate(pr);
-        //  else
-        //    ko.mapping.fromJS(pr, {}, self.pullRequests[prIndex]);
-        //}
-        if (pullRequestCache.length != 0)
-          ko.mapping.fromJS(pullRequestCache, {}, self.pullRequests);
-        console.log("Retrieved " + pullRequestCache.length + " pull requests, making a total of " + self.pullRequests().length + " at " + new Date());
-        if (onComplete)
-          onComplete();
-      } else {
-        var lastUpdated = new Date(pullRequestCache[pullRequestCache.length - 1].updated_at);
-        loadAllPages(baseQuery + " updated:>=" + dateToGitHubISOString(lastUpdated), function (prs) {
-          self.update(pullRequestCache.concat(prs), minimumResults, onComplete);
-        });
-      }
-    };
-
-  self.load =
-    function () {
-      var totalCount;
-      // Load the first set of pages
-      loadAllPages(baseQuery, function (prs, count) {
-        totalCount = count;
-        self.update(prs, totalCount, function () {
-          setInterval(function () { viewModel.update([], totalCount); }, 60 * 1000);
-        });
+  function processSearchResults(pullRequestCache, onComplete) {
+    // Don't retrieve more search results if already have as many as totalCount
+    // We might have more than totalCount if we have retrieved PRs updated on the date of the overlaps between queries more than once
+    var requestAgain = pullRequestCache.length < totalCount;
+    if (pullRequestCache.length != 0) {
+      // Check whether lastPRUpdate has progressed, if not there's no point in repeating the last query
+      var newLastUpdate = new Date(pullRequestCache[pullRequestCache.length - 1].updated_at);
+      if (!(newLastUpdate <= self.lastPRUpdate()))
+        // Store the updated lastPRUpdate
+        self.lastPRUpdate(newLastUpdate);
+      else
+        requestAgain = false;
+    } else
+      requestAgain = false;
+    if (!requestAgain) {
+      if (!self.uninitialised()) {
+        // Add the pull requests to the array - this is very slow
+        for (let pr of pullRequestCache) {
+          var prIndex = self.pullRequests.mappedIndexOf(pr);
+          if (prIndex === -1)
+            self.pullRequests.mappedCreate(pr);
+          else
+            ko.mapping.fromJS(pr, {}, self.pullRequests[prIndex]);
+        }
+      } else
+        ko.mapping.fromJS(pullRequestCache, {}, self.pullRequests);
+      console.log("Retrieved " + pullRequestCache.length + " pull requests, making a total of " + self.pullRequests().length + " at " + new Date());
+      if (onComplete)
+        onComplete();
+    } else {
+      loadAllPages(baseQuery + " updated:>=" + dateToGitHubISOString(self.lastPRUpdate()), function (prs) {
+        processSearchResults(pullRequestCache.concat(prs), onComplete);
       });
-    };
+    }
+  }
+
+  var totalCount;
+
+  self.load = function () {
+    // Load the first set of pages
+    loadAllPages(baseQuery, function (prs, count) {
+      totalCount = count;
+      processSearchResults(prs, function () { setInterval(self.update, 60 * 1000); });
+    });
+  };
+
+  self.update = function (onComplete) {
+    loadAllPages(baseQuery + " updated:>=" + dateToGitHubISOString(self.lastPRUpdate()), function (prs) {
+      processSearchResults(prs, onComplete);
+    });
+  };
 }
