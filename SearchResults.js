@@ -7,14 +7,14 @@ function PullRequest(data) {
     console.log("Created PullRequest with no data");
   ko.mapping.fromJS(data, {}, self);
 
-  self.createdAt = new Date(self.created_at());
-  self.updatedAt = new Date(self.updated_at());
-  self.isOpen = self.closed_at() == null;
-  self.closedAt = self.isOpen ? null : new Date(self.closed_at());
-  self.age = (self.isOpen ? new Date() : self.closedAt) - self.createdAt;
+  self.createdAt = ko.pureComputed(function () { return new Date(self.created_at()); });
+  self.updatedAt = ko.pureComputed(function () { return new Date(self.updated_at()); });
+  self.isOpen = ko.pureComputed(function () { return self.closed_at() == null; });
+  self.closedAt = ko.pureComputed(function () { return self.isOpen() ? null : new Date(self.closed_at()); });
+  self.age = ko.pureComputed(function () { return (self.isOpen() ? new Date() : self.closedAt()) - self.createdAt(); });
 
   self.isOpenAtDate = function (when) {
-    return self.createdAt <= when && (self.isOpen || self.closedAt > when);
+    return self.createdAt() <= when && (self.isOpen() || self.closedAt() > when);
   };
 }
 
@@ -32,16 +32,16 @@ function SearchResults() {
         create: function (options) { return new PullRequest(options.data); }
       });
   self.openPullRequests = ko.pureComputed(function () {
-    return self.pullRequests().filter(function (pr) { return pr.isOpen; });
+    return self.pullRequests().filter(function (pr) { return pr.isOpen(); });
   });
   self.closedPullRequests = ko.pureComputed(function () {
-    return self.pullRequests().filter(function (pr) { return !pr.isOpen; });
+    return self.pullRequests().filter(function (pr) { return !pr.isOpen(); });
   });
   self.openPRsAtDate = function(when) {
     return self.pullRequests().filter(function (pr) { return pr.isOpenAtDate(when); });
   };
   self.pullRequestAges = function (open) {
-    return (open ? self.openPullRequests() : self.closedPullRequests()).map(function (pr) { return pr.age; });
+    return (open ? self.openPullRequests() : self.closedPullRequests()).map(function (pr) { return pr.age(); });
   };
   self.averagePRAge = function (open) {
     return ko.pureComputed(function () { return average(self.pullRequestAges(open)); });
@@ -53,7 +53,7 @@ function SearchResults() {
     return ko.pureComputed(function () { return _.max(self.pullRequestAges(open)); });
   };
   self.agesOfPRsOpenAt = function (when) {
-    return self.openPRsAtDate(when).map(function (pr) { return when - pr.createdAt; });
+    return self.openPRsAtDate(when).map(function (pr) { return when - pr.createdAt(); });
   };
   self.lastPRUpdate = ko.observable();
 
