@@ -7,6 +7,10 @@ body {
 	font-size: 100px;
 }
 
+body.disaster {
+	background-image: url("images/backgrounds/1a-red.jpg");
+}
+
 .loadingWaiter {
 	text-align: center;
 	font-size: 300px;
