@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="diffblue.css" />
   </head>
-  <body>
+  <body data-bind="with: searchResults, css: { disaster: !travisBuild.passed() }">
     <div data-bind="visible: uninitialised">
       <p class="loadingWaiter">Loading...</p>
     </div>
@@ -215,10 +215,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.3/lodash.min.js"></script>
     <script src="GitHub-utils.js"></script>
     <script src="SearchResults.js"></script>
+    <script src="TravisBuilds.js"></script>
     <script>
-      var viewModel = new SearchResults();
+      var viewModel =
+        {
+          searchResults: new SearchResults(),
+          travisBuild: new TravisBuilds("diffblue/quality-assurance", "master")
+        };
       $(function () {
-        viewModel.load();
+        viewModel.searchResults.load();
+        viewModel.travisBuild.load();
         ko.applyBindings(viewModel);
       });
     </script>

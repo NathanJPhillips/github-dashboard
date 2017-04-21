@@ -6,10 +6,13 @@ var username = "username";
 // A personal access token from https://github.com/settings/tokens
 var accessCode = "token";
 
+// An API token from https://developer.travis-ci.com/authentication
+var travisAccessCode = "token";
+
 // ///////////////////// Leave the below /////////////////////
 
 $.ajaxSetup({
-  beforeSend: function (xhr) {
-    xhr.setRequestHeader("Authorization", "Basic " + btoa(username + ":" + accessCode));
+  beforeSend: function(jqXHR) {
+    jqXHR.setRequestHeader("Authorization", "Basic " + btoa(username + ":" + accessCode));
   }
 });
