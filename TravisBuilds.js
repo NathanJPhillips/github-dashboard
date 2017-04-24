@@ -2,7 +2,23 @@ function TravisBuilds(repo, branch) {
   var self = this;
 
   self.buildState = ko.observable();
-  self.passed = ko.pureComputed(function () { return self.buildState() == "passed"; });
+  self.previousBuildState = ko.observable();
+
+  function specificState(buildState, state) {
+    return ko.pureComputed(function () { return buildState() == state; });
+  }
+  self.created = specificState(self.buildState, "created");
+  self.started = specificState(self.buildState, "started");
+  self.passed = specificState(self.buildState, "passed");
+  self.failed = specificState(self.buildState, "failed");
+
+  self.building = ko.pureComputed(function() { return self.created() || self.started(); });
+
+  self.lastCompleteBuildState = ko.pureComputed(function() {
+    return self.building() ? self.previousBuildState() : self.buildState();
+  });
+  self.lastCompleteBuildPassed = specificState(self.lastCompleteBuildState, "passed");
+  self.lastCompleteBuildFailed = specificState(self.lastCompleteBuildState, "failed");
 
   function request(method, uri, data, success) {
     return $.ajax(
@@ -28,11 +44,12 @@ function TravisBuilds(repo, branch) {
       "/repo/" + encodeURIComponent(repo) + "/branch/" + encodeURIComponent(branch),
       function (data, textStatus, jqXHR) {
         self.buildState(data.last_build.state);
+        self.previousBuildState(data.last_build.previous_state);
       });
   }
 
   self.load = function () {
       self.update();
-      setInterval(function() { self.update(); }, 5 * 01 * 1000);
+      setInterval(function() { self.update(); }, 1 * 60 * 1000);
     };
 }
