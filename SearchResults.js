@@ -80,10 +80,10 @@ function SearchResults() {
     var dates = [];
     var openPRCountHistory = [];
     var when = new Date();
-    for (var week = 0; week < limit; ++week) {
+    for (var count = 0; count < limit; ++count) {
       dates.push(new Date(when).toLocaleDateString());
       openPRCountHistory.push(f(when));
-      when -= msInAWeek;
+      when -= msInADay;
     }
     return { labels: dates.reverse(), data: openPRCountHistory.reverse() };
   };
