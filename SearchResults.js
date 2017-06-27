@@ -149,7 +149,7 @@ function SearchResults() {
     getPage("https://api.github.com/search/issues?q=" + encodeURIComponent(query) + "&sort=updated&order=asc&per_page=100");
   }
 
-  var baseQuery = "user:diffblue type:pr";
+  var baseQuery = "user:diffblue type:pr -repo:diffblue/cbmc -repo:diffblue/cprover-sv-comp -repo:diffblue/2ls";
 
   function processSearchResults(pullRequestCache, onComplete) {
     // Don't retrieve more search results if already have as many as totalCount
